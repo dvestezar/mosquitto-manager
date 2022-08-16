@@ -1,4 +1,6 @@
-import os,msq_mng.menus as menus,time
+import os,time,importlib
+import msq_mng.lng as mlng
+lng=mlng.lng
 
 msqt_root='/etc/mosquitto/'
 
@@ -42,8 +44,10 @@ if len(inc_fls)>0:
         getlines(x.readlines(),lns)
         x.close()
 
+import msq_mng.menus as menus
 menus.file_users=findprop(lns,'password_file')
 menus.file_acl=findprop(lns,'acl_file')
+
 
 choice=''
 fn=''
@@ -51,12 +55,12 @@ while fn!=None:
     menus.generate_users()
     menus.clear()
     choice,fn=menus.choice('main',[
-        '- password file : '+menus.file_users,
-        '- ACL file      : '+menus.file_acl,
-        '- Users count   : '+str(len(menus._menu['users'])-2)
+        '- '+lng.mainmenu_pwdfile +' : '+menus.file_users,
+        '- '+lng.mainmenu_aclfile +' : '+menus.file_acl,
+        '- '+lng.mainmenu_ucnt    +' : '+str(len(menus._menu['users'])-2)
     ])
     if fn!=None and fn!=False:
         fn(choice)
     
 menus.clear()
-print('QUIT')
+print(lng.quittx)

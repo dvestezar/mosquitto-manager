@@ -1,10 +1,10 @@
 import os,re,subprocess,getpass,msq_mng.acl as acl
 import msq_mng.getch as getch
+import msq_mng.lng as mlng
+
+lng=mlng.lng
 kbd=getch._Getch()
-
 clear = lambda: os.system('clear')
-
-
 last_menuid=None
 
 def show(menu_id,add_tx=[],err='',info=''):
@@ -14,10 +14,10 @@ def show(menu_id,add_tx=[],err='',info=''):
     - err pokud<>'' tak je zobrazeno jako error
     - info pokud <>'' tak je zobrazen info řádek"""
     global last_menuid
-    ln='--------------------------'
-    x='*************************'
+    ln=lng.line
+    x=lng.starline
     print(x)
-    print('*** Mosquitto manager ***')
+    print('*** '+lng.app_title+' ***')
     print(x)
     last_menuid=None
     if menu_id in _menu.keys() or menu_id=='':
@@ -31,12 +31,12 @@ def show(menu_id,add_tx=[],err='',info=''):
                 print (x, '--', _menu[menu_id][x]['tx'] )
             print(ln)
     else:
-        print('Menu id not found: ',id)
+        print(lng.err_menuid+': ',id)
     if err!='':
-        print('!!! ERROR:',err,'!!!')
+        print('!!! '+lng.err+': ',err,'!!!')
         print(ln)
     if info!='':
-        print('INFO:',info)
+        print(lng.nfo+': ',info)
         print(ln)
 
 def choice(menu_id,add_tx=[],err='',info=''):
@@ -49,7 +49,7 @@ def choice(menu_id,add_tx=[],err='',info=''):
     if last_menuid==None:
         return None
     # o = input('Enter your choice: ')
-    print('Press your choice : ',end='',flush=True)
+    print(lng.keychoice+' : ',end='',flush=True)
     o=kbd()
     try:
         if o>='0' and o<='9':
@@ -83,25 +83,25 @@ def generate_users():
             if(cnt<10):
                 k='0'+k
             _menu['users'][k]={
-                'tx':'  >>> user: '+y[0],
+                'tx':'  >>> '+lng .user+': '+y[0],
                 'us':y[0],
                 'fn':menu_user_mng
             }
             cnt+=1
-        _menu['users']['N']={
-            'tx':'New user',
+        _menu['users'][lng.choiceNew[0]]={
+            'tx':lng.user_new,
             'us':None,
             'fn':create_user
         }
         x.close()
     else:
-        _menu['users']['F']={
-            'tx':'Users file not found - create ?',
+        _menu['users'][lng.choiseUserFile[0]]={
+            'tx':lng.user_file,
             'us':None,
             'fn':create_user_file
         }
-    _menu['users']['Q']={
-        'tx':'Back',
+    _menu['users'][lng.choiceQ[0]]={
+        'tx':lng.back,
         'us':None,
         'fn':None
     }
@@ -112,7 +112,7 @@ def menu_users(in_choice):
     fn=''
     while fn!=None:
         clear()
-        c,fn=choice('users',['Manage users'])
+        c,fn=choice('users',[lng.users_manage])
         if fn!=None and fn!=False:
             fn(c)
 
@@ -123,7 +123,7 @@ def menu_user_mng(in_choice):
     msg=''
     while fn!=None:
         clear()
-        c,fn=choice('user_mng',['Edit selected user: '+us['us']],msg)
+        c,fn=choice('user_mng',[lng.user_edit+': '+us['us']],msg)
         if fn!=None:
             # musí vrátit tuple(stav,msg) kde stav None=back, true/false=again (false=chyba), msg=None nebo string zobrazeného textu
             if fn!=False:
@@ -141,16 +141,16 @@ def create_user(in_choice):
     er=''
     while True:
         clear()
-        show('',['Create new user, type Q for exit'],er)
-        nm=input('Enter new user name ( a-z 0-9 _ ), min length 4: ')
+        show('',[lng.user_create],er)
+        nm=input(lng.user_enter+': ')
         if re.search("^[a-z0-9_]+$",nm)!=None:
-            if nm=='Q' or nm=='q':
+            if nm in lng.choiceQ:
                 return None
             if len(nm)<4:
-                er='wrong length'
+                er=lng.user_lng_err
             else:
                 if nm=='patterns':
-                    er='Username contains forbidden word'
+                    er=lng.user_err_word
                 else:
                     f=False
                     for y in _menu['users'].keys():
@@ -158,7 +158,7 @@ def create_user(in_choice):
                             if _menu['users'][y]['us']==nm:
                                 f=True
                     if f:
-                        er="User exists, type another"
+                        er=lng.user_exists
                     else:
                         #get pwd
                         pwd,ermsg=enterPwd()
@@ -175,21 +175,21 @@ def create_user(in_choice):
                                 generate_users()
                                 return True
         else:
-            er="found wong character in name"
+            er=lng.user_err_char
 
 
 def enterPwd():
     """při chybě vrací (None,'error msg') jinak ('password','')"""
-    pwd=getpass.getpass('Enter password ( a-z 0-9 _ & # @ * - ) min length 6: ')
+    pwd=getpass.getpass(lng.pwd_new+': ')
     if re.search("^[a-z0-9_&@#*-]+$",pwd)==None:
-        return None,"found frong chars in password"
+        return None,lng.pwd_err_char
     else:
         if len(pwd)<6:
-            return None,'Min password length: 6'
+            return None,lng.pwd_lng
         else:
-            pwd2=getpass.getpass('Enter password again: ')
+            pwd2=getpass.getpass(lng.pwd_again+': ')
             if pwd!=pwd2:
-                return None,'Passwords not equal'
+                return None,lng.pwd_neq
             else:
                 return pwd,''
 
@@ -206,7 +206,7 @@ def create_user_file(in_choice):
 
 def user_chng_pwd(in_choice):
     clear()
-    show('',['Change password for user "'+in_choice+'"'])
+    show('',[lng.pwd_us+' "'+in_choice+'"'])
     pwd,msg=enterPwd()
     if pwd==None:
         return False,msg
@@ -236,14 +236,14 @@ def menu_acl(in_choice):
     while fn!=None:
         acl.generate_ACL()
         clear()
-        c,fn=choice('acl',['Manage users ACL'])
+        c,fn=choice('acl',[lng.user_mng_acl])
         if fn!=None and fn!=False:
             fn(c)
     
 
 def user_delete(in_choice):  
-    o=input('Realy delete user "'+in_choice+'" ? (y=Yes, other=No) : ')
-    if o=='y' or o=='Y':
+    o=input(lng.user_del+' "'+in_choice+'" ? '+lng.yesother+' : ')
+    if o in lng.choiceY:
         cmd='mosquitto_passwd -D '+file_users+' "'+in_choice+'"'
         p = subprocess.Popen([cmd], shell=True , stderr=subprocess.STDOUT, stdout=subprocess.PIPE)
         p.wait()
@@ -256,27 +256,27 @@ def user_delete(in_choice):
     return True,''
 
 def restart_msqt(c):
-    print('Restarting, wait for message: Press any key.')
+    print(lng.msqt_restart)
     os.system('systemctl restart mosquitto')
-    print('Press any key')
+    print(lng.pressakey)
     kbd()
 
 _menu={
     'main':{
-        'U':{
-            'tx':'Users',
+        lng.choiceUsers[0]:{
+            'tx':lng.menu_users,
             'fn':menu_users
         },
-        'A':{
-            'tx':'ACL',
+        lng.choiceACL[0]:{
+            'tx':lng.menu_acl,
             'fn':menu_acl
         },
-        'R':{
-            'tx':'Restart mosquito',
+        lng.choiceResMsq[0]:{
+            'tx':lng.menu_res_msq,
             'fn':restart_msqt
         },
-        'Q':{
-            'tx':'Exit',
+        lng.choiceQuittx[0]:{
+            'tx':lng.quittx,
             'fn':None
         }
     },
@@ -291,16 +291,16 @@ _menu={
     'acl_line_menu':{
     },
     'user_mng':{
-        'C':{
-            'tx':'Change password',
+        lng.choicepwdchng[0]:{
+            'tx':lng.menu_chngpwd,
             'fn':user_chng_pwd
         },
-        'D':{
-            'tx':'Delete user',
+        lng.choiceDelUs[0]:{
+            'tx':lng.menu_delUs,
             'fn':user_delete
         },
-        'Q':{
-            'tx':'Back',
+        lng.choiceQ[0]:{
+            'tx':lng.back,
             'fn':None
         }
     }
