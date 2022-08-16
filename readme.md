@@ -1,5 +1,5 @@
 # Mosquitto manager
-Jednoduchý konzolový manažer pro mosquitto broker na Ubuntu. 
+Jednoduchý konzolový manažer pro mosquitto broker na Ubuntu. Podpora jazykových souborů.
 Testováno na Ubuntu 20+, Python 3+
 
 Edituje soubory **passwd** a **aclfile**, pokud nejsou, tak doporučuji vytvořit. Samozřejmostí je spuštění scriptu jako root.
