@@ -1,5 +1,6 @@
 # Mosquitto manager
 Jednoduchý konzolový manažer pro mosquitto broker na Ubuntu. 
+Testováno na Ubuntu 20+, Python 3+
 
 Edituje soubory **passwd** a **aclfile**, pokud nejsou, tak doporučuji vytvořit. Samozřejmostí je spuštění scriptu jako root.
 
@@ -18,10 +19,8 @@ Edituje soubory **passwd** a **aclfile**, pokud nejsou, tak doporučuji vytvoři
     1. Editace bloku : global
 1. *Restart mosqitto brokeru*
 
-Po jakékoliv editaci doporučuji restart mosquitta pro zavedené nové konfigurace :D oba soubory jsou totiž konfigurací a ne live data v databázi.
+Po jakékoliv editaci doporučuji restart mosquitta pro zavedení nové konfigurace :D oba soubory jsou totiž konfigurací a ne live data v databázi.
 
 Editace řádků ACL : zeptá se na atribut read a write a následně se zadá cesta/topic. Jak je uvedeno v dokumentaci, pokud zadáme read a write, tak je to to samé jako by jsme je neuvedli. 
-
-Testováno na Ubuntu 20+
 
 PS: úmyslem nebylo něco poskytnout celému světu, nebo čisté kódy ale něco funkčního rychle sesmolit. Komu se chce tak může přeložit pro celý svět a očistit kód ;) To že jsem to sem dal je jen malinké plus pro toho kdo využije.
